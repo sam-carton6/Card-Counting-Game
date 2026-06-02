@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Card Counter Pro</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ═══════════════════════════════ HEADER ═══════════════════════════════ -->
+  <header class="app-header">
+    <div class="header-left">
+      <span class="logo">♠ Card Counter Pro</span>
+    </div>
+    <nav class="main-nav" role="navigation" aria-label="Mode navigation">
+      <button class="nav-btn active" data-mode="flashcard">Flashcard Drill</button>
+      <button class="nav-btn" data-mode="speed">Speed Round</button>
+      <button class="nav-btn" data-mode="multi">Multi-Card</button>
+      <button class="nav-btn" data-mode="blackjack">Blackjack</button>
+      <button class="nav-btn" data-mode="learn">Learn</button>
+      <button class="nav-btn" data-mode="stats">Stats</button>
+    </nav>
+    <div class="header-right">
+      <button class="icon-btn" id="settingsBtn" title="Casino Settings" aria-label="Open settings">⚙</button>
+      <button class="icon-btn" id="darkModeBtn" title="Toggle light/dark mode" aria-label="Toggle dark mode">☀</button>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════ SETTINGS PANEL ═══════════════════════════ -->
+  <aside class="settings-panel" id="settingsPanel" aria-label="Casino settings" aria-hidden="true">
+    <div class="settings-header">
+      <h2>Casino Settings</h2>
+      <button class="close-btn" id="closeSettings" aria-label="Close settings">✕</button>
+    </div>
+    <div class="settings-body">
+
+      <div class="setting-group">
+        <label class="setting-label">Number of Decks</label>
+        <div class="btn-group" id="deckCountGroup" role="group" aria-label="Number of decks">
+          <button class="opt-btn active" data-value="1">1</button>
+          <button class="opt-btn" data-value="2">2</button>
+          <button class="opt-btn" data-value="4">4</button>
+          <button class="opt-btn" data-value="6">6</button>
+          <button class="opt-btn" data-value="8">8</button>
+        </div>
+      </div>
+
+      <div class="setting-group">
+        <label class="setting-label" for="penetrationSlider">
+          Penetration: <span id="penetrationDisplay">75%</span>
+        </label>
+        <input type="range" id="penetrationSlider" min="25" max="95" value="75" step="5"
+               aria-label="Penetration percentage">
+        <div class="slider-labels">
+          <span>25%</span><span>Shallow ← → Deep</span><span>95%</span>
+        </div>
+      </div>
+
+      <div class="setting-group">
+        <label class="setting-label">Counting System</label>
+        <div class="btn-group" role="group">
+          <button class="opt-btn active" aria-pressed="true">Hi-Lo</button>
+        </div>
+        <p class="setting-note">More systems coming soon.</p>
+      </div>
+
+      <div class="setting-group">
+        <label class="setting-label">Blackjack Rules</label>
+        <ul class="rules-list">
+          <li>Dealer hits soft 17</li>
+          <li>Blackjack pays 3:2</li>
+          <li>Double down allowed</li>
+          <li>Split allowed</li>
+        </ul>
+      </div>
+
+    </div>
+  </aside>
+
+  <div class="overlay" id="overlay"></div>
+
+  <!-- ═══════════════════════════ MAIN CONTENT ════════════════════════════ -->
+  <main class="main-content">
+
+    <!-- ──────────────── FLASHCARD DRILL ──────────────── -->
+    <section class="mode-section active" id="flashcard-mode" aria-label="Flashcard Drill">
+      <div class="mode-header">
+        <h2>Flashcard Drill</h2>
+        <button class="help-btn" data-mode="flashcard">How to play</button>
+      </div>
+
+      <div class="game-area felt-surface">
+
+        <div class="shoe-bar">
+          <div class="shoe-text">
+            <span id="fc-shoe-info">Press Start to begin</span>
+            <span class="shoe-sep">·</span>
+            <span id="fc-deck-info">1 deck · 75% penetration</span>
+          </div>
+          <div class="shoe-progress-track">
+            <div class="shoe-progress-fill" id="fc-shoe-progress" style="width:0%"></div>
+          </div>
+        </div>
+
+        <div class="card-stage">
+          <div class="card-wrapper" id="fc-card-wrapper">
+            <div class="playing-card face-down" id="fc-card">
+              <div class="card-back"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="count-zone">
+          <div class="count-prompt">What is the running count?</div>
+          <div class="count-input-row">
+            <button class="count-adj-btn" id="fc-minus" aria-label="Decrease count">−</button>
+            <input type="number" id="fc-count-input" value="0" min="-200" max="200"
+                   inputmode="numeric" aria-label="Running count">
+            <button class="count-adj-btn" id="fc-plus" aria-label="Increase count">+</button>
+          </div>
+          <button class="submit-btn" id="fc-submit">Submit <kbd>↵</kbd></button>
+        </div>
+
+        <div class="feedback-bar" id="fc-feedback" role="status" aria-live="polite"></div>
+
+        <div class="session-stats-row">
+          <div class="ss-item">
+            <div class="ss-value" id="fc-correct">0</div>
+            <div class="ss-label">Correct</div>
+          </div>
+          <div class="ss-item">
+            <div class="ss-value" id="fc-streak">0</div>
+            <div class="ss-label">Streak</div>
+          </div>
+          <div class="ss-item">
+            <div class="ss-value" id="fc-accuracy">—</div>
+            <div class="ss-label">Accuracy</div>
+          </div>
+          <div class="ss-item">
+            <div class="ss-value" id="fc-cards">0</div>
+            <div class="ss-label">Cards Seen</div>
+          </div>
+        </div>
+
+        <div class="action-row">
+          <button class="primary-btn" id="fc-start">Start</button>
+          <button class="secondary-btn" id="fc-reset">Reset</button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ──────────────── SPEED ROUND (stub) ──────────────── -->
+    <section class="mode-section" id="speed-mode" aria-label="Speed Round">
+      <div class="coming-soon">
+        <div class="cs-icon">⏱</div>
+        <h2>Speed Round</h2>
+        <p>Timed flashcard drill — race against the clock.</p>
+        <span class="cs-badge">Coming Soon</span>
+      </div>
+    </section>
+
+    <!-- ──────────────── MULTI-CARD (stub) ──────────────── -->
+    <section class="mode-section" id="multi-mode" aria-label="Multi-Card">
+      <div class="coming-soon">
+        <div class="cs-icon">🃏</div>
+        <h2>Multi-Card</h2>
+        <p>3–5 cards revealed at once. Track the net count.</p>
+        <span class="cs-badge">Coming Soon</span>
+      </div>
+    </section>
+
+    <!-- ──────────────── BLACKJACK (stub) ──────────────── -->
+    <section class="mode-section" id="blackjack-mode" aria-label="Blackjack Practice">
+      <div class="coming-soon">
+        <div class="cs-icon">♠</div>
+        <h2>Blackjack Practice</h2>
+        <p>Full game with real-time count accuracy grading.</p>
+        <span class="cs-badge">Coming Soon</span>
+      </div>
+    </section>
+
+    <!-- ──────────────── LEARN ──────────────── -->
+    <section class="mode-section" id="learn-mode" aria-label="Learn Hi-Lo">
+      <div class="learn-content" id="learn-content">
+        <!-- populated by JS -->
+      </div>
+    </section>
+
+    <!-- ──────────────── STATS ──────────────── -->
+    <section class="mode-section" id="stats-mode" aria-label="Statistics">
+      <div class="stats-content" id="stats-content">
+        <!-- populated by JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══════════════════════════ HOW-TO MODAL ════════════════════════════ -->
+  <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modal-title">How to Play</h3>
+        <button class="close-btn" id="closeModal" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer">
+        <button class="secondary-btn" id="modal-dismiss">Maybe Later</button>
+        <button class="primary-btn" id="modal-start">Start Playing</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
