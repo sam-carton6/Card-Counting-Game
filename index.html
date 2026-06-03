@@ -20,6 +20,13 @@
     <div class="header-left">
       <span class="logo">♠ Card Counter Pro</span>
     </div>
+    <!-- Hamburger: mobile only -->
+    <button class="nav-hamburger" id="navHamburger" aria-haspopup="true" aria-expanded="false" aria-controls="navDropdown">
+      <span id="navCurrentMode">Flashcard Drill</span>
+      <span class="hamburger-icon">▾</span>
+    </button>
+
+    <!-- Pill buttons: desktop only -->
     <nav class="main-nav" role="navigation" aria-label="Mode navigation">
       <button class="nav-btn active" data-mode="flashcard">Flashcard</button>
       <button class="nav-btn" data-mode="speed">Speed Round</button>
@@ -102,6 +109,16 @@
 
     </div>
   </aside>
+  <!-- Mobile dropdown nav (fixed below header) -->
+  <nav class="nav-dropdown" id="navDropdown" aria-label="Mode navigation">
+    <button class="nav-drop-item active" data-mode="flashcard">Flashcard Drill</button>
+    <button class="nav-drop-item" data-mode="speed">Speed Round</button>
+    <button class="nav-drop-item" data-mode="multi">Multi-Card</button>
+    <button class="nav-drop-item" data-mode="blackjack">Blackjack</button>
+    <button class="nav-drop-item" data-mode="learn">Learn</button>
+    <button class="nav-drop-item" data-mode="stats">Stats</button>
+  </nav>
+
   <div class="overlay" id="overlay"></div>
 
   <!-- ═══════════════════ MAIN CONTENT ═══════════════════ -->

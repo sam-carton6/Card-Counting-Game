@@ -12,16 +12,25 @@ A browser-based card counting practice app built in vanilla HTML, CSS, and JavaS
 | **Blackjack Practice** | ✅ Live | Full game — count tracked and graded in the background |
 | **Learn** | ✅ Live | Hi-Lo reference: card values, true count, betting ramp |
 
+---
+
 ## Getting started
 
-### Play instantly (no install)
+### Play in a browser (desktop or mobile)
+
+The app is hosted at:  
+**[https://sam-carton6.github.io/Card-Counting-Game/](https://sam-carton6.github.io/Card-Counting-Game/)**
+
+Open that link on any device — no install required.
+
+### Download and run locally
 
 1. Go to the [GitHub repository](https://github.com/sam-carton6/Card-Counting-Game)
 2. Click **Code → Download ZIP**
 3. Unzip the folder
-4. Open **`index.html`** in any modern browser (Chrome, Firefox, Edge, Safari)
+4. Open **`index.html`** in any modern browser
 
-That's it — no internet connection required after download.
+No internet connection required after download.
 
 ### Clone with git
 
@@ -31,14 +40,23 @@ cd Card-Counting-Game
 # open index.html in your browser
 ```
 
-### Optional: run a local server
+---
 
-Opening `index.html` directly works fine. If you prefer a proper server (useful when adding custom card image assets):
+## Install on iPhone (works offline)
 
-```bash
-python -m http.server 3400
-# then visit http://localhost:3400
-```
+The app is a Progressive Web App — it can be installed on your iPhone home screen and works fully offline after the first visit.
+
+1. Open **Safari** on your iPhone (must be Safari, not Chrome)
+2. Go to **[https://sam-carton6.github.io/Card-Counting-Game/](https://sam-carton6.github.io/Card-Counting-Game/)**
+3. Tap the **Share** button (the box with an arrow pointing up)
+4. Scroll down and tap **Add to Home Screen**
+5. Tap **Add**
+
+The app will appear on your home screen and launch full-screen with no browser chrome, just like a native app. All game modes, stats, and settings work offline.
+
+> **Android:** Open in Chrome → tap the three-dot menu → **Add to Home screen**
+
+---
 
 ## Casino Settings
 
@@ -52,9 +70,15 @@ python -m http.server 3400
 
 Settings and all session stats are saved automatically in your browser's `localStorage`.
 
+---
+
 ## Custom card artwork
 
-Drop your own PNG card images into the `assets/cards/` folder and they will replace the CSS-drawn cards automatically — no code changes needed. See [`assets/cards/NAMING.md`](assets/cards/NAMING.md) for the file naming convention. The CSS cards remain the fallback if any image is missing.
+Drop your own PNG card images into the `assets/cards/` folder and they will replace the CSS-drawn cards automatically — no code changes needed. See [`assets/cards/NAMING.md`](assets/cards/NAMING.md) for the file naming convention (`AS.png`, `10H.png`, `back.png`, etc.). CSS cards are the fallback if any image is missing.
+
+To generate the app icon PNGs, open `assets/make-icons.html` in a browser and save the two canvases as `icon-192.png` and `icon-512.png` into the `assets/` folder.
+
+---
 
 ## File structure
 
@@ -62,9 +86,14 @@ Drop your own PNG card images into the `assets/cards/` folder and they will repl
 index.html          — app shell: all mode sections, settings panel, modal
 style.css           — casino theme, dark/light mode, card styles, layout
 app.js              — deck engine, Hi-Lo logic, all game modes, stats
+manifest.json       — PWA manifest (installable app)
+sw.js               — service worker (offline caching)
 assets/
   cards/            — optional hand-drawn card PNGs (see NAMING.md)
+  make-icons.html   — generates icon-192.png and icon-512.png
 ```
+
+---
 
 ## Hi-Lo quick reference
 

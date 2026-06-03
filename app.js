@@ -311,8 +311,8 @@ class FlashcardDrill {
     document.getElementById('fc-submit').addEventListener('click', () => this._submit());
     document.getElementById('fc-start').addEventListener('click', () => this.start());
     document.getElementById('fc-reset').addEventListener('click', () => this._endSession());
-    document.getElementById('fc-minus').addEventListener('click', () => { this._el.input.value = (parseInt(this._el.input.value) || 0) - 1; this._el.input.focus(); });
-    document.getElementById('fc-plus') .addEventListener('click', () => { this._el.input.value = (parseInt(this._el.input.value) || 0) + 1; this._el.input.focus(); });
+    document.getElementById('fc-minus').addEventListener('click', () => { this._el.input.value = (parseInt(this._el.input.value) || 0) - 1; });
+    document.getElementById('fc-plus') .addEventListener('click', () => { this._el.input.value = (parseInt(this._el.input.value) || 0) + 1; });
     this._el.input.addEventListener('keydown', e => { if (e.key === 'Enter') this._submit(); });
   }
 
@@ -333,7 +333,7 @@ class FlashcardDrill {
     this.currentCard = card; this.locked = false;
     renderCard(card, this._el.card, true);
     this._updateShoeBar();
-    this._el.input.focus(); this._el.input.select();
+    if (!window.matchMedia('(pointer: coarse)').matches) { this._el.input.focus(); this._el.input.select(); }
   }
 
   _submit() {
@@ -415,8 +415,8 @@ class SpeedRound {
     document.getElementById('sr-submit').addEventListener('click', () => this._submit());
     document.getElementById('sr-start') .addEventListener('click', () => this.start());
     document.getElementById('sr-reset') .addEventListener('click', () => this._endSession(true));
-    document.getElementById('sr-minus') .addEventListener('click', () => { this._el.input.value = (parseInt(this._el.input.value) || 0) - 1; this._el.input.focus(); });
-    document.getElementById('sr-plus')  .addEventListener('click', () => { this._el.input.value = (parseInt(this._el.input.value) || 0) + 1; this._el.input.focus(); });
+    document.getElementById('sr-minus') .addEventListener('click', () => { this._el.input.value = (parseInt(this._el.input.value) || 0) - 1; });
+    document.getElementById('sr-plus')  .addEventListener('click', () => { this._el.input.value = (parseInt(this._el.input.value) || 0) + 1; });
     this._el.input.addEventListener('keydown', e => { if (e.key === 'Enter') this._submit(); });
   }
 
@@ -460,7 +460,7 @@ class SpeedRound {
     this.currentCard = card; this.locked = false;
     renderCard(card, this._el.card, true);
     this._updateShoeBar();
-    this._el.input.focus(); this._el.input.select();
+    if (!window.matchMedia('(pointer: coarse)').matches) { this._el.input.focus(); this._el.input.select(); }
   }
 
   _submit() {
@@ -542,8 +542,8 @@ class MultiCardDrill {
     document.getElementById('mc-submit').addEventListener('click', () => this._submit());
     document.getElementById('mc-start') .addEventListener('click', () => this.start());
     document.getElementById('mc-reset') .addEventListener('click', () => this._endSession());
-    document.getElementById('mc-minus') .addEventListener('click', () => { this._el.input.value = (parseInt(this._el.input.value) || 0) - 1; this._el.input.focus(); });
-    document.getElementById('mc-plus')  .addEventListener('click', () => { this._el.input.value = (parseInt(this._el.input.value) || 0) + 1; this._el.input.focus(); });
+    document.getElementById('mc-minus') .addEventListener('click', () => { this._el.input.value = (parseInt(this._el.input.value) || 0) - 1; });
+    document.getElementById('mc-plus')  .addEventListener('click', () => { this._el.input.value = (parseInt(this._el.input.value) || 0) + 1; });
     this._el.input.addEventListener('keydown', e => { if (e.key === 'Enter') this._submit(); });
   }
 
@@ -571,7 +571,7 @@ class MultiCardDrill {
     this.locked = false;
     this._renderGroup();
     this._updateShoeBar();
-    this._el.input.focus(); this._el.input.select();
+    if (!window.matchMedia('(pointer: coarse)').matches) { this._el.input.focus(); this._el.input.select(); }
   }
 
   _renderGroup() {
@@ -854,7 +854,7 @@ class BlackjackGame {
     this._el.nextHandBtn.disabled        = true;
 
     this._showPhase('result');
-    this._el.countInput.focus();
+    if (!window.matchMedia('(pointer: coarse)').matches) this._el.countInput.focus();
     this._updateBetHint();
     this._updateStats();
   }
@@ -1205,6 +1205,27 @@ function initApp() {
   document.querySelectorAll('.nav-btn').forEach(btn =>
     btn.addEventListener('click', () => switchMode(btn.dataset.mode)));
 
+  // Mobile hamburger dropdown
+  const navHamburger = document.getElementById('navHamburger');
+  const navDropdown  = document.getElementById('navDropdown');
+
+  navHamburger.addEventListener('click', e => {
+    e.stopPropagation();
+    const open = navDropdown.classList.toggle('open');
+    navHamburger.setAttribute('aria-expanded', String(open));
+  });
+
+  document.querySelectorAll('.nav-drop-item').forEach(btn =>
+    btn.addEventListener('click', () => switchMode(btn.dataset.mode)));
+
+  // Close dropdown on outside click
+  document.addEventListener('click', e => {
+    if (!navDropdown.contains(e.target) && e.target !== navHamburger) {
+      navDropdown.classList.remove('open');
+      navHamburger.setAttribute('aria-expanded', 'false');
+    }
+  });
+
   // ── Settings Panel ───────────────────────────────────────────────────────
   const panel   = document.getElementById('settingsPanel');
   const overlay = document.getElementById('overlay');
@@ -1288,12 +1309,34 @@ function initApp() {
   syncSettingsUI();
 }
 
+const MODE_LABELS = {
+  flashcard: 'Flashcard Drill', speed: 'Speed Round', multi: 'Multi-Card',
+  blackjack: 'Blackjack', learn: 'Learn', stats: 'Stats',
+};
+
 function switchMode(mode) {
+  // Close dropdown regardless of whether mode changed
+  document.getElementById('navDropdown').classList.remove('open');
+  document.getElementById('navHamburger').setAttribute('aria-expanded', 'false');
+
   if (mode === currentMode) return;
   currentMode = mode;
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+
+  // Desktop pill buttons
+  document.querySelectorAll('.nav-btn')
+    .forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+
+  // Mobile dropdown items
+  document.querySelectorAll('.nav-drop-item')
+    .forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+
+  // Hamburger label
+  document.getElementById('navCurrentMode').textContent = MODE_LABELS[mode] || mode;
+
+  // Show section
   document.querySelectorAll('.mode-section').forEach(s => s.classList.remove('active'));
   document.getElementById(`${mode}-mode`)?.classList.add('active');
+
   if (mode === 'stats') renderStatsView();
 }
 
