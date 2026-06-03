@@ -243,7 +243,10 @@
     <section class="mode-section" id="blackjack-mode">
       <div class="mode-header">
         <h2>Blackjack Practice</h2>
-        <button class="help-btn" data-mode="blackjack">How to play</button>
+        <div class="mode-header-actions">
+          <button class="hint-toggle-btn" id="bj-hint-toggle">💡 Bet Hints</button>
+          <button class="help-btn" data-mode="blackjack">How to play</button>
+        </div>
       </div>
       <div class="bj-table felt-surface">
 
@@ -280,6 +283,19 @@
           <span class="bj-count-grade" id="bj-count-grade"></span>
         </div>
 
+        <!-- Bet hint panel — visible when toggle is on -->
+        <div class="bj-bet-hint hidden" id="bj-bet-hint">
+          <div class="bj-hint-item">
+            <span class="bj-hint-lbl">True count</span>
+            <span class="bj-hint-true neu" id="bj-true-count">+0</span>
+          </div>
+          <div class="bj-hint-divider"></div>
+          <div class="bj-hint-item">
+            <span class="bj-hint-lbl">Suggested bet</span>
+            <span class="bj-hint-suggestion hint-neg" id="bj-hint-suggestion">Table minimum</span>
+          </div>
+        </div>
+
         <div class="bj-controls">
           <div class="bj-chips-row">
             <div class="bj-chips-info">
@@ -313,8 +329,12 @@
 
           <!-- Result phase -->
           <div class="bj-phase hidden" id="bj-phase-result">
-            <div class="bj-count-check" id="bj-count-check"></div>
-            <button class="primary-btn" id="bj-next-hand">Next Hand</button>
+            <div class="bj-count-confirm-row">
+              <span class="bj-confirm-prompt">Update your count for all cards played, then lock it in</span>
+              <button class="secondary-btn" id="bj-confirm-count">Lock In Count</button>
+            </div>
+            <div class="bj-count-check hidden" id="bj-count-check"></div>
+            <button class="primary-btn" id="bj-next-hand" disabled>Next Hand</button>
           </div>
         </div>
 

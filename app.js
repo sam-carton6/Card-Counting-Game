@@ -128,6 +128,7 @@ let settings = {
   penetration:   0.75,
   timeLimit:     60,
   cardsPerGroup: 3,
+  bjShowHints:   false,
 };
 
 function loadSettings() {
@@ -643,10 +644,14 @@ class BlackjackGame {
     this.wins = 0;        this.losses = 0; this.pushes = 0;
     this._actualCount = 0;
     this.countChecks = { correct: 0, total: 0 };
+    this.showHints = settings.bjShowHints || false;
     this._cache(); this._bind();
     this._showPhase('bet');
     this._updateChipsDisplay();
     this._updateStats();
+    // Restore hint toggle state
+    this._el.betHintPanel.classList.toggle('hidden', !this.showHints);
+    this._el.hintToggleBtn.classList.toggle('active', this.showHints);
   }
 
   _cache() {
@@ -662,11 +667,17 @@ class BlackjackGame {
       chips:      document.getElementById('bj-chips'),
       betDisplay: document.getElementById('bj-bet-display'),
       dealBtn:    document.getElementById('bj-deal-btn'),
-      countInput: document.getElementById('bj-count-input'),
-      countGrade: document.getElementById('bj-count-grade'),
-      countCheck: document.getElementById('bj-count-check'),
-      hitBtn:     document.getElementById('bj-hit'),
-      doubleBtn:  document.getElementById('bj-double'),
+      countInput:      document.getElementById('bj-count-input'),
+      countGrade:      document.getElementById('bj-count-grade'),
+      countCheck:      document.getElementById('bj-count-check'),
+      confirmCountBtn: document.getElementById('bj-confirm-count'),
+      nextHandBtn:     document.getElementById('bj-next-hand'),
+      betHintPanel:    document.getElementById('bj-bet-hint'),
+      hintToggleBtn:   document.getElementById('bj-hint-toggle'),
+      trueCountEl:     document.getElementById('bj-true-count'),
+      hintSuggestion:  document.getElementById('bj-hint-suggestion'),
+      hitBtn:          document.getElementById('bj-hit'),
+      doubleBtn:       document.getElementById('bj-double'),
       statWins:   document.getElementById('bj-stat-wins'),
       statLosses: document.getElementById('bj-stat-losses'),
       statChips:  document.getElementById('bj-stat-chips'),
@@ -683,9 +694,12 @@ class BlackjackGame {
     document.getElementById('bj-hit')       .addEventListener('click', () => this._hit());
     document.getElementById('bj-stand')     .addEventListener('click', () => this._stand());
     document.getElementById('bj-double')    .addEventListener('click', () => this._double());
-    document.getElementById('bj-next-hand') .addEventListener('click', () => this._nextHand());
-    document.getElementById('bj-count-minus').addEventListener('click', () => { this._el.countInput.value = (parseInt(this._el.countInput.value) || 0) - 1; });
-    document.getElementById('bj-count-plus') .addEventListener('click', () => { this._el.countInput.value = (parseInt(this._el.countInput.value) || 0) + 1; });
+    document.getElementById('bj-next-hand')    .addEventListener('click', () => this._nextHand());
+    document.getElementById('bj-confirm-count').addEventListener('click', () => this._confirmCount());
+    document.getElementById('bj-hint-toggle')  .addEventListener('click', () => this._toggleBetHint());
+    document.getElementById('bj-count-minus').addEventListener('click', () => { this._el.countInput.value = (parseInt(this._el.countInput.value) || 0) - 1; this._updateBetHint(); });
+    document.getElementById('bj-count-plus') .addEventListener('click', () => { this._el.countInput.value = (parseInt(this._el.countInput.value) || 0) + 1; this._updateBetHint(); });
+    this._el.countInput.addEventListener('input', () => this._updateBetHint());
   }
 
   _addBet(amount) {
@@ -744,7 +758,7 @@ class BlackjackGame {
       // Player natural — reveal dealer, then pause so player can update count
       this.dealerHand.forEach(c => { if (c.faceDown) { this._actualCount += c.value; delete c.faceDown; } });
       this._renderHands(); this._updateValues();
-      this._promptCountUpdate(() => this._endRound(dt === 21 ? 'push' : 'blackjack'));
+      setTimeout(() => this._endRound(dt === 21 ? 'push' : 'blackjack'), 600);
     } else {
       this.phase = 'player';
       this._showPhase('play');
@@ -758,7 +772,7 @@ class BlackjackGame {
     this._updateValues();
     if (handTotal(this.playerHand) > 21) {
       this._revealDealer();
-      this._promptCountUpdate(() => this._endRound('bust'));
+      setTimeout(() => this._endRound('bust'), 600);
     }
     this._el.doubleBtn.disabled = true; // can't double after hit
   }
@@ -780,7 +794,7 @@ class BlackjackGame {
     this._updateValues();
     if (handTotal(this.playerHand) > 21) {
       this._revealDealer();
-      this._promptCountUpdate(() => this._endRound('bust'));
+      setTimeout(() => this._endRound('bust'), 600);
     } else {
       this.phase = 'dealer';
       this._showPhase('none');
@@ -805,8 +819,7 @@ class BlackjackGame {
       this._updateValues();
       setTimeout(() => this._runDealer(), 550);
     } else {
-      // Dealer is done — give player a moment to update their count, then resolve
-      this._promptCountUpdate(() => this._resolveRound());
+      setTimeout(() => this._resolveRound(), 500);
     }
   }
 
@@ -820,57 +833,91 @@ class BlackjackGame {
   }
 
   _endRound(outcome) {
-    // Check count accuracy
-    const userCount   = parseInt(this._el.countInput.value, 10) || 0;
-    const actualCount = this._actualCount;
-    this.countChecks.total++;
-    const countOk = userCount === actualCount;
-    if (countOk) this.countChecks.correct++;
-
-    const s = n => (n >= 0 ? '+' : '') + n;
-    this._el.countCheck.innerHTML =
-      `My count: <span class="ck-${countOk ? 'correct' : 'wrong'}">${s(userCount)}</span>` +
-      ` · Actual: <span class="ck-correct">${s(actualCount)}</span>` +
-      (countOk ? ' ✓' : ` · Off by ${Math.abs(userCount - actualCount)}`);
-
-    const acc = this.countChecks.total
-      ? `${Math.round(this.countChecks.correct / this.countChecks.total * 100)}%` : '—';
-    this._el.countGrade.textContent = acc;
-    this._el.countGrade.className   = `bj-count-grade ${countOk ? 'good' : 'bad'}`;
-
     let payout = 0, bannerText = '', bannerClass = '';
     switch (outcome) {
-      case 'blackjack':    payout = Math.floor(this.bet * 2.5); bannerText = '♠ Blackjack! 3:2'; bannerClass = 'blackjack'; this.wins++;   Audio.win();   break;
-      case 'bust':         payout = 0;                          bannerText = 'Bust';              bannerClass = 'lose';      this.losses++; Audio.lose();  break;
-      case 'dealer-bust':  payout = this.bet * 2;               bannerText = 'Dealer Bust — Win'; bannerClass = 'win';       this.wins++;   Audio.win();   break;
-      case 'win':          payout = this.bet * 2;               bannerText = 'You Win!';          bannerClass = 'win';       this.wins++;   Audio.win();   break;
-      case 'lose':         payout = 0;                          bannerText = 'Dealer Wins';       bannerClass = 'lose';      this.losses++; Audio.lose();  break;
-      case 'push':         payout = this.bet;                   bannerText = 'Push';              bannerClass = 'push';      this.pushes++; Audio.chips(); break;
+      case 'blackjack':   payout = Math.floor(this.bet * 2.5); bannerText = '♠ Blackjack! 3:2'; bannerClass = 'blackjack'; this.wins++;   Audio.win();   break;
+      case 'bust':        payout = 0;                          bannerText = 'Bust';              bannerClass = 'lose';      this.losses++; Audio.lose();  break;
+      case 'dealer-bust': payout = this.bet * 2;               bannerText = 'Dealer Bust — Win'; bannerClass = 'win';       this.wins++;   Audio.win();   break;
+      case 'win':         payout = this.bet * 2;               bannerText = 'You Win!';          bannerClass = 'win';       this.wins++;   Audio.win();   break;
+      case 'lose':        payout = 0;                          bannerText = 'Dealer Wins';       bannerClass = 'lose';      this.losses++; Audio.lose();  break;
+      case 'push':        payout = this.bet;                   bannerText = 'Push';              bannerClass = 'push';      this.pushes++; Audio.chips(); break;
     }
-
     this.chips += payout;
     this._updateChipsDisplay();
     this._showResultBanner(bannerText, bannerClass);
+
+    // Reset the confirm-count UI — player must lock in before continuing
+    this._el.countCheck.innerHTML = '';
+    this._el.countCheck.classList.add('hidden');
+    this._el.confirmCountBtn.disabled    = false;
+    this._el.confirmCountBtn.textContent = 'Lock In Count';
+    this._el.nextHandBtn.disabled        = true;
+
     this._showPhase('result');
+    this._el.countInput.focus();
+    this._updateBetHint();
     this._updateStats();
   }
 
-  // Show "update your count" hint for 1.8s then call callback.
-  // Count input stays fully editable throughout.
-  _promptCountUpdate(callback) {
-    this._el.countGrade.textContent = '← update now';
-    this._el.countGrade.className   = 'bj-count-grade';
-    this._el.countInput.focus();
-    setTimeout(() => {
-      this._el.countGrade.textContent = '';
-      callback();
-    }, 1800);
+  // Player explicitly confirms their count → runs accuracy check → unlocks Next Hand
+  _confirmCount() {
+    const userCount   = parseInt(this._el.countInput.value, 10) || 0;
+    const actualCount = this._actualCount;
+    this.countChecks.total++;
+    const ok = userCount === actualCount;
+    if (ok) this.countChecks.correct++;
+
+    const s = n => (n >= 0 ? '+' : '') + n;
+    this._el.countCheck.innerHTML =
+      `My count: <span class="ck-${ok ? 'correct' : 'wrong'}">${s(userCount)}</span>` +
+      ` · Actual: <span class="ck-correct">${s(actualCount)}</span>` +
+      (ok ? ' ✓' : ` · Off by ${Math.abs(userCount - actualCount)}`);
+    this._el.countCheck.classList.remove('hidden');
+
+    const acc = `${Math.round(this.countChecks.correct / this.countChecks.total * 100)}%`;
+    this._el.countGrade.textContent = acc;
+    this._el.countGrade.className   = `bj-count-grade ${ok ? 'good' : 'bad'}`;
+
+    this._el.confirmCountBtn.disabled    = true;
+    this._el.confirmCountBtn.textContent = ok ? '✓ Correct!' : '✓ Locked';
+    this._el.nextHandBtn.disabled        = false;
+
+    if (ok) Audio.correct(); else Audio.incorrect();
+    this._updateStats();
+  }
+
+  _toggleBetHint() {
+    this.showHints = !this.showHints;
+    this._el.betHintPanel.classList.toggle('hidden', !this.showHints);
+    this._el.hintToggleBtn.classList.toggle('active', this.showHints);
+    settings.bjShowHints = this.showHints;
+    saveSettings();
+    if (this.showHints) this._updateBetHint();
+  }
+
+  _updateBetHint() {
+    if (!this.showHints) return;
+    const userCount = parseInt(this._el.countInput.value, 10) || 0;
+    const decksLeft = this.deck ? Math.max(0.5, this.deck.remaining / 52) : settings.numDecks;
+    const trueCount = Math.round(userCount / decksLeft);
+    const s = n => (n >= 0 ? '+' : '') + n;
+
+    this._el.trueCountEl.textContent = s(trueCount);
+    this._el.trueCountEl.className   = `bj-hint-true ${trueCount > 0 ? 'pos' : trueCount < 0 ? 'neg' : 'neu'}`;
+
+    let text, cls;
+    if      (trueCount <= 0) { text = 'Table minimum';         cls = 'hint-neg'; }
+    else if (trueCount === 1) { text = '1× base — slight edge'; cls = 'hint-neu'; }
+    else if (trueCount === 2) { text = '2× base — moderate edge'; cls = 'hint-pos-low'; }
+    else if (trueCount <= 4) { text = '4× base — strong edge'; cls = 'hint-pos-med'; }
+    else                     { text = 'Max bet — major edge';  cls = 'hint-pos-high'; }
+
+    this._el.hintSuggestion.textContent = text;
+    this._el.hintSuggestion.className   = `bj-hint-suggestion ${cls}`;
   }
 
   _nextHand() {
-    if (this.chips <= 0) {
-      this.chips = 100; // rebuy
-    }
+    if (this.chips <= 0) this.chips = 100; // rebuy
     this.bet = 0;
     this._el.betDisplay.textContent = '$0';
     this._el.dealBtn.disabled = true;
@@ -879,11 +926,9 @@ class BlackjackGame {
     this.playerHand = []; this.dealerHand = [];
     this._renderHands(); this._updateValues();
     this._updateChipsDisplay();
-
-    // Carry the correct running count forward into the next hand
-    // so the player starts from an accurate baseline
+    // Seed count input with the correct running count so next hand starts clean
     this._el.countInput.value = String(this._actualCount);
-
+    this._updateBetHint();
     this.phase = 'bet';
     this._showPhase('bet');
   }

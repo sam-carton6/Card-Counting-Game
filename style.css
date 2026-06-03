@@ -1494,5 +1494,110 @@ input[type=number]#fc-count-input:focus { background: rgba(200,160,42,0.06); }
 .bj-count-check .ck-correct { color: #2ecc71; font-weight: 700; }
 .bj-count-check .ck-wrong   { color: #e74c3c; font-weight: 700; }
 
+/* ── Primary btn disabled ──────────────────────────────────────────────── */
+.primary-btn:disabled {
+  background: var(--gold-dim);
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+.primary-btn:disabled:hover { background: var(--gold-dim); filter: none; }
+
+/* ── Mode header actions ────────────────────────────────────────────────── */
+.mode-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Bet Hints toggle button ────────────────────────────────────────────── */
+.hint-toggle-btn {
+  background: transparent;
+  border: 1px solid var(--panel-border);
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  padding: 5px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.hint-toggle-btn:hover  { color: var(--gold); border-color: var(--gold-dim); }
+.hint-toggle-btn.active { background: var(--gold-subtle); border-color: var(--gold); color: var(--gold-bright); }
+
+/* ── Bet hint panel ─────────────────────────────────────────────────────── */
+.bj-bet-hint {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  align-items: center;
+  background: rgba(0,0,0,0.22);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  animation: fadeSlideIn 0.2s ease;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.bj-hint-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 14px;
+  gap: 4px;
+}
+
+.bj-hint-divider {
+  width: 1px;
+  height: 44px;
+  background: var(--panel-border);
+  flex-shrink: 0;
+}
+
+.bj-hint-lbl {
+  font-size: 0.65rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.bj-hint-true {
+  font-family: Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.bj-hint-true.pos { color: #2ecc71; }
+.bj-hint-true.neg { color: #e74c3c; }
+.bj-hint-true.neu { color: var(--text-dim); }
+
+.bj-hint-suggestion { font-size: 0.82rem; font-weight: 600; text-align: center; }
+.bj-hint-suggestion.hint-neg      { color: var(--text-muted); }
+.bj-hint-suggestion.hint-neu      { color: var(--text-dim); }
+.bj-hint-suggestion.hint-pos-low  { color: #f0c040; }
+.bj-hint-suggestion.hint-pos-med  { color: #e8a020; }
+.bj-hint-suggestion.hint-pos-high { color: #2ecc71; font-weight: 800; }
+
+/* ── Count confirm row (result phase) ───────────────────────────────────── */
+.bj-count-confirm-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 4px 0;
+}
+
+.bj-confirm-prompt {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-style: italic;
+  text-align: center;
+}
+
 /* ── Utility ────────────────────────────────────────────────────────────── */
 .hidden { display: none !important; }
