@@ -1,77 +1,77 @@
 # ♠ Card Counter Pro
 
-A browser-based card counting practice app built in vanilla HTML, CSS, and JavaScript — no frameworks, no dependencies.
+A browser-based card counting practice app built in vanilla HTML, CSS, and JavaScript — no frameworks, no build step, no dependencies.
 
-## Features
+## Modes
 
-### Flashcard Drill *(live)*
-- Cards dealt one at a time from a configurable shoe
-- Enter your running count after each card; app confirms and auto-advances
-- Session stats: correct answers, streak, accuracy, cards seen
-- Session history saved to `localStorage`
+| Mode | Status | Description |
+|---|---|---|
+| **Flashcard Drill** | ✅ Live | One card at a time — enter running count, get instant feedback |
+| **Speed Round** | ✅ Live | Timed drill — maximize accuracy under pressure |
+| **Multi-Card** | ✅ Live | 3–5 cards revealed at once — count groups at a glance |
+| **Blackjack Practice** | ✅ Live | Full game — count tracked and graded in the background |
+| **Learn** | ✅ Live | Hi-Lo reference: card values, true count, betting ramp |
 
-### Coming soon
-- **Speed Round** — timed flashcard drill
-- **Multi-Card** — 3–5 cards revealed at once
-- **Blackjack Practice** — full game with background count grading
+## Getting started
 
-### Learn section
-- Complete Hi-Lo reference: card values, running count, true count formula, betting ramp table
+### Play instantly (no install)
 
-### Casino Settings
+1. Go to the [GitHub repository](https://github.com/sam-carton6/Card-Counting-Game)
+2. Click **Code → Download ZIP**
+3. Unzip the folder
+4. Open **`index.html`** in any modern browser (Chrome, Firefox, Edge, Safari)
+
+That's it — no internet connection required after download.
+
+### Clone with git
+
+```bash
+git clone https://github.com/sam-carton6/Card-Counting-Game.git
+cd Card-Counting-Game
+# open index.html in your browser
+```
+
+### Optional: run a local server
+
+Opening `index.html` directly works fine. If you prefer a proper server (useful when adding custom card image assets):
+
+```bash
+python -m http.server 3400
+# then visit http://localhost:3400
+```
+
+## Casino Settings
+
 | Setting | Options |
 |---|---|
 | Number of decks | 1, 2, 4, 6, 8 |
-| Penetration | 25% – 95% |
-| Counting system | Hi-Lo (2–6 = +1 · 7–9 = 0 · 10/J/Q/K/A = −1) |
+| Penetration | 25% – 95% (how deep before reshuffling) |
+| Speed Round timer | 30 s · 60 s · 90 s · 2 min |
+| Multi-Card group size | 3 · 4 · 5 cards |
+| Counting system | Hi-Lo |
 
-- Dark / light mode toggle
-- All settings and stats persist via `localStorage`
+Settings and all session stats are saved automatically in your browser's `localStorage`.
 
-## Running locally
+## Custom card artwork
 
-No build step required — it's static HTML.
-
-**Option 1 — open the file directly:**
-```
-index.html   (double-click or drag into a browser)
-```
-
-**Option 2 — local server (avoids any file:// quirks):**
-```bash
-python -m http.server 3400
-# then open http://localhost:3400
-```
+Drop your own PNG card images into the `assets/cards/` folder and they will replace the CSS-drawn cards automatically — no code changes needed. See [`assets/cards/NAMING.md`](assets/cards/NAMING.md) for the file naming convention. The CSS cards remain the fallback if any image is missing.
 
 ## File structure
 
 ```
-index.html   — app shell, all mode sections, settings panel, modal
-style.css    — casino theme, CSS variables for dark/light mode, card styles
-app.js       — deck engine, Hi-Lo logic, Flashcard Drill, stats, Learn content
-push.ps1     — one-command commit + push helper (see below)
+index.html          — app shell: all mode sections, settings panel, modal
+style.css           — casino theme, dark/light mode, card styles, layout
+app.js              — deck engine, Hi-Lo logic, all game modes, stats
+assets/
+  cards/            — optional hand-drawn card PNGs (see NAMING.md)
 ```
 
-## Quick commit & push
+## Hi-Lo quick reference
 
-A PowerShell helper is included so you can ship updates with one command:
-
-```powershell
-.\push.ps1
-```
-
-It shows what changed, prompts for a commit message, stages everything, commits, and pushes. You can also pass the message directly:
-
-```powershell
-.\push.ps1 "add speed round mode"
-```
-
-## Counting system — Hi-Lo quick reference
-
-| Cards | Value | Meaning |
+| Cards | Value | What it means |
 |---|---|---|
-| 2 · 3 · 4 · 5 · 6 | **+1** | Low cards removed — shoe getting better |
-| 7 · 8 · 9 | **0** | Neutral |
-| 10 · J · Q · K · A | **−1** | High cards removed — shoe getting worse |
+| 2 · 3 · 4 · 5 · 6 | **+1** | Low cards gone — shoe getting richer |
+| 7 · 8 · 9 | **0** | Neutral — no change |
+| 10 · J · Q · K · A | **−1** | High cards gone — shoe getting weaker |
 
-A positive running count means the remaining shoe is rich in high cards — bet more.
+A positive running count means high cards dominate the remaining shoe — this is when you bet more.

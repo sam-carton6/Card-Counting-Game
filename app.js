@@ -22,13 +22,17 @@ const HI_LO = {
 const Audio = (() => {
   let _ctx = null;
 
-  function ctx() {
-    if (!_ctx) _ctx = new (window.AudioContext || window.webkitAudioContext)();
-    if (_ctx.state === 'suspended') _ctx.resume();
-    return _ctx;
+  function safe(fn) {
+    try {
+      if (!_ctx) _ctx = new (window.AudioContext || window.webkitAudioContext)();
+      // resume() is async — wait for it before scheduling any nodes
+      if (_ctx.state === 'running') {
+        fn(_ctx);
+      } else {
+        _ctx.resume().then(() => fn(_ctx)).catch(() => {});
+      }
+    } catch {}
   }
-
-  function safe(fn) { try { fn(ctx()); } catch {} }
 
   function osc(c, type, freq, gainVal, dur, startT) {
     const o = c.createOscillator();
@@ -737,10 +741,10 @@ class BlackjackGame {
     const dt = handTotal(this.dealerHand, true);
 
     if (pt === 21) {
-      // Player natural — reveal dealer immediately
+      // Player natural — reveal dealer, then pause so player can update count
       this.dealerHand.forEach(c => { if (c.faceDown) { this._actualCount += c.value; delete c.faceDown; } });
       this._renderHands(); this._updateValues();
-      this._endRound(dt === 21 ? 'push' : 'blackjack');
+      this._promptCountUpdate(() => this._endRound(dt === 21 ? 'push' : 'blackjack'));
     } else {
       this.phase = 'player';
       this._showPhase('play');
@@ -754,7 +758,7 @@ class BlackjackGame {
     this._updateValues();
     if (handTotal(this.playerHand) > 21) {
       this._revealDealer();
-      this._endRound('bust');
+      this._promptCountUpdate(() => this._endRound('bust'));
     }
     this._el.doubleBtn.disabled = true; // can't double after hit
   }
@@ -776,7 +780,7 @@ class BlackjackGame {
     this._updateValues();
     if (handTotal(this.playerHand) > 21) {
       this._revealDealer();
-      this._endRound('bust');
+      this._promptCountUpdate(() => this._endRound('bust'));
     } else {
       this.phase = 'dealer';
       this._showPhase('none');
@@ -801,7 +805,8 @@ class BlackjackGame {
       this._updateValues();
       setTimeout(() => this._runDealer(), 550);
     } else {
-      this._resolveRound();
+      // Dealer is done — give player a moment to update their count, then resolve
+      this._promptCountUpdate(() => this._resolveRound());
     }
   }
 
@@ -850,10 +855,21 @@ class BlackjackGame {
     this._updateStats();
   }
 
+  // Show "update your count" hint for 1.8s then call callback.
+  // Count input stays fully editable throughout.
+  _promptCountUpdate(callback) {
+    this._el.countGrade.textContent = '← update now';
+    this._el.countGrade.className   = 'bj-count-grade';
+    this._el.countInput.focus();
+    setTimeout(() => {
+      this._el.countGrade.textContent = '';
+      callback();
+    }, 1800);
+  }
+
   _nextHand() {
     if (this.chips <= 0) {
       this.chips = 100; // rebuy
-      this._showFeedbackBanner('Rebuy — $100 chips added', 'push');
     }
     this.bet = 0;
     this._el.betDisplay.textContent = '$0';
@@ -863,6 +879,11 @@ class BlackjackGame {
     this.playerHand = []; this.dealerHand = [];
     this._renderHands(); this._updateValues();
     this._updateChipsDisplay();
+
+    // Carry the correct running count forward into the next hand
+    // so the player starts from an accurate baseline
+    this._el.countInput.value = String(this._actualCount);
+
     this.phase = 'bet';
     this._showPhase('bet');
   }
