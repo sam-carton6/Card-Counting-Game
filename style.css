@@ -1167,3 +1167,332 @@ input[type=number]#fc-count-input:focus { background: rgba(200,160,42,0.06); }
 @media (max-width: 400px) {
   .session-row { grid-template-columns: 65px 60px 50px 45px 60px; font-size: 0.72rem; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   HAND-DRAWN CARD ASSET OVERLAY
+   Place PNG files at assets/cards/{RANK}{SUIT}.png  e.g. AS.png, 10H.png
+   back.png for the card back.  Falls back to CSS card if image is absent.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.card-asset {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: calc(var(--card-radius) - 1px);
+  display: none; /* shown by JS on successful load */
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* ── Speed Round ────────────────────────────────────────────────────────── */
+.sr-timer-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  max-width: 280px;
+}
+
+.sr-timer {
+  font-family: Georgia, serif;
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--gold-bright);
+  line-height: 1;
+  transition: color 0.3s;
+  min-width: 3ch;
+  text-align: center;
+}
+
+.sr-timer.warning { color: #e74c3c; }
+
+.sr-timer-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.sr-timer-track {
+  width: 100%;
+  height: 4px;
+  background: rgba(0,0,0,0.35);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 2px;
+}
+
+.sr-timer-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+  border-radius: 2px;
+  transition: width 1s linear, background 0.3s;
+}
+
+.sr-timer-bar.warning {
+  background: linear-gradient(90deg, #c0392b, #e74c3c);
+}
+
+/* ── Multi-Card ─────────────────────────────────────────────────────────── */
+.mc-card-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  min-height: 120px;
+  padding: 8px 4px;
+}
+
+.mc-card-row .playing-card {
+  width: 76px;
+  height: 110px;
+}
+
+.mc-card-row .card-center-suit { font-size: 2.2rem; }
+.mc-card-row .card-rank        { font-size: 0.95rem; }
+
+/* ── Blackjack Table ────────────────────────────────────────────────────── */
+.bj-table {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 16px 24px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.bj-table .shoe-bar { width: 100%; max-width: 520px; }
+
+.bj-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 520px;
+}
+
+.bj-area-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(230, 210, 138, 0.45);
+  align-self: flex-start;
+}
+
+.bj-hand-val {
+  color: var(--gold-bright);
+  font-weight: 700;
+}
+
+.bj-hand {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 112px;
+  position: relative;
+}
+
+.bj-hand .playing-card {
+  width: 76px;
+  height: 110px;
+  flex-shrink: 0;
+}
+
+.bj-hand .playing-card + .playing-card { margin-left: -20px; }
+
+.bj-hand .card-center-suit { font-size: 2.2rem; }
+.bj-hand .card-rank        { font-size: 0.95rem; }
+
+/* Result banner between dealer / player */
+.bj-result-banner {
+  font-family: Georgia, serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 8px 28px;
+  border-radius: 30px;
+  text-align: center;
+  transition: opacity 0.25s;
+}
+
+.bj-result-banner.win       { color: #2ecc71; background: rgba(39,174,96,0.15);  border: 1px solid rgba(46,204,113,0.35); }
+.bj-result-banner.lose      { color: #e74c3c; background: rgba(192,57,43,0.15); border: 1px solid rgba(231,76,60,0.35); }
+.bj-result-banner.push      { color: var(--gold); background: rgba(200,160,42,0.12); border: 1px solid var(--panel-border); }
+.bj-result-banner.blackjack { color: #f1c40f; background: rgba(241,196,15,0.15); border: 1px solid rgba(241,196,15,0.4); }
+
+/* Count row */
+.bj-count-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 520px;
+  padding: 10px 14px;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+}
+
+.bj-count-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.bj-count-input-group {
+  display: flex;
+  align-items: center;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.bj-count-input-group input[type=number] {
+  width: 56px;
+  height: 34px;
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--panel-border);
+  border-right: 1px solid var(--panel-border);
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  -moz-appearance: textfield;
+}
+.bj-count-input-group input::-webkit-outer-spin-button,
+.bj-count-input-group input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+.count-adj-btn.sm {
+  width: 32px;
+  height: 34px;
+  font-size: 1.1rem;
+}
+
+.bj-count-grade {
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-left: auto;
+}
+.bj-count-grade.good { color: #2ecc71; }
+.bj-count-grade.bad  { color: #e74c3c; }
+
+/* BJ controls area */
+.bj-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 520px;
+}
+
+.bj-chips-row {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.bj-chips-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.bj-chips-lbl {
+  font-size: 0.65rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.bj-chips-val {
+  font-family: Georgia, serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--gold-bright);
+}
+
+.bj-phase {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+.bj-chip-buttons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.chip-btn {
+  background: radial-gradient(circle at 35% 35%, #d4a843, #8a6010);
+  border: 2px solid #c9a030;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 800;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
+  transition: transform 0.1s, box-shadow 0.1s;
+  letter-spacing: 0.02em;
+}
+
+.chip-btn:hover  { transform: translateY(-2px); box-shadow: 0 5px 12px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.2); }
+.chip-btn:active { transform: translateY(0); }
+
+.chip-btn.chip-clear {
+  background: radial-gradient(circle at 35% 35%, #666, #333);
+  border-color: #555;
+  font-size: 0.9rem;
+}
+
+/* Action buttons (Hit / Stand / Double) */
+.action-btn {
+  border: none;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 12px 22px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: filter 0.15s, transform 0.1s;
+  min-width: 80px;
+}
+.action-btn:active { transform: scale(0.96); }
+
+.hit-btn    { background: linear-gradient(135deg, #27ae60, #1e8449); }
+.stand-btn  { background: linear-gradient(135deg, #c0392b, #922b21); }
+.double-btn { background: linear-gradient(135deg, #2471a3, #1a5276); }
+.action-btn:hover { filter: brightness(1.15); }
+.action-btn:disabled { opacity: 0.4; cursor: not-allowed; filter: none; }
+
+.bj-count-check {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  text-align: center;
+  padding: 6px 0;
+}
+
+.bj-count-check .ck-correct { color: #2ecc71; font-weight: 700; }
+.bj-count-check .ck-wrong   { color: #e74c3c; font-weight: 700; }
+
+/* ── Utility ────────────────────────────────────────────────────────────── */
+.hidden { display: none !important; }

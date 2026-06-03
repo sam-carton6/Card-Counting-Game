@@ -8,13 +8,12 @@
 </head>
 <body>
 
-  <!-- ═══════════════════════════════ HEADER ═══════════════════════════════ -->
   <header class="app-header">
     <div class="header-left">
       <span class="logo">♠ Card Counter Pro</span>
     </div>
     <nav class="main-nav" role="navigation" aria-label="Mode navigation">
-      <button class="nav-btn active" data-mode="flashcard">Flashcard Drill</button>
+      <button class="nav-btn active" data-mode="flashcard">Flashcard</button>
       <button class="nav-btn" data-mode="speed">Speed Round</button>
       <button class="nav-btn" data-mode="multi">Multi-Card</button>
       <button class="nav-btn" data-mode="blackjack">Blackjack</button>
@@ -22,22 +21,22 @@
       <button class="nav-btn" data-mode="stats">Stats</button>
     </nav>
     <div class="header-right">
-      <button class="icon-btn" id="settingsBtn" title="Casino Settings" aria-label="Open settings">⚙</button>
-      <button class="icon-btn" id="darkModeBtn" title="Toggle light/dark mode" aria-label="Toggle dark mode">☀</button>
+      <button class="icon-btn" id="settingsBtn" title="Casino Settings">⚙</button>
+      <button class="icon-btn" id="darkModeBtn" title="Toggle dark mode">☀</button>
     </div>
   </header>
 
-  <!-- ═══════════════════════════ SETTINGS PANEL ═══════════════════════════ -->
-  <aside class="settings-panel" id="settingsPanel" aria-label="Casino settings" aria-hidden="true">
+  <!-- ═══════════════════ SETTINGS PANEL ═══════════════════ -->
+  <aside class="settings-panel" id="settingsPanel" aria-hidden="true">
     <div class="settings-header">
       <h2>Casino Settings</h2>
-      <button class="close-btn" id="closeSettings" aria-label="Close settings">✕</button>
+      <button class="close-btn" id="closeSettings">✕</button>
     </div>
     <div class="settings-body">
 
       <div class="setting-group">
         <label class="setting-label">Number of Decks</label>
-        <div class="btn-group" id="deckCountGroup" role="group" aria-label="Number of decks">
+        <div class="btn-group" id="deckCountGroup" role="group">
           <button class="opt-btn active" data-value="1">1</button>
           <button class="opt-btn" data-value="2">2</button>
           <button class="opt-btn" data-value="4">4</button>
@@ -50,17 +49,35 @@
         <label class="setting-label" for="penetrationSlider">
           Penetration: <span id="penetrationDisplay">75%</span>
         </label>
-        <input type="range" id="penetrationSlider" min="25" max="95" value="75" step="5"
-               aria-label="Penetration percentage">
+        <input type="range" id="penetrationSlider" min="25" max="95" value="75" step="5">
         <div class="slider-labels">
           <span>25%</span><span>Shallow ← → Deep</span><span>95%</span>
         </div>
       </div>
 
       <div class="setting-group">
+        <label class="setting-label">Speed Round — Time Limit</label>
+        <div class="btn-group" id="timeLimitGroup" role="group">
+          <button class="opt-btn" data-value="30">30s</button>
+          <button class="opt-btn active" data-value="60">60s</button>
+          <button class="opt-btn" data-value="90">90s</button>
+          <button class="opt-btn" data-value="120">2 min</button>
+        </div>
+      </div>
+
+      <div class="setting-group">
+        <label class="setting-label">Multi-Card — Cards per Group</label>
+        <div class="btn-group" id="cardsPerGroupGroup" role="group">
+          <button class="opt-btn active" data-value="3">3</button>
+          <button class="opt-btn" data-value="4">4</button>
+          <button class="opt-btn" data-value="5">5</button>
+        </div>
+      </div>
+
+      <div class="setting-group">
         <label class="setting-label">Counting System</label>
         <div class="btn-group" role="group">
-          <button class="opt-btn active" aria-pressed="true">Hi-Lo</button>
+          <button class="opt-btn active">Hi-Lo</button>
         </div>
         <p class="setting-note">More systems coming soon.</p>
       </div>
@@ -71,27 +88,24 @@
           <li>Dealer hits soft 17</li>
           <li>Blackjack pays 3:2</li>
           <li>Double down allowed</li>
-          <li>Split allowed</li>
+          <li>Split — coming soon</li>
         </ul>
       </div>
 
     </div>
   </aside>
-
   <div class="overlay" id="overlay"></div>
 
-  <!-- ═══════════════════════════ MAIN CONTENT ════════════════════════════ -->
+  <!-- ═══════════════════ MAIN CONTENT ═══════════════════ -->
   <main class="main-content">
 
-    <!-- ──────────────── FLASHCARD DRILL ──────────────── -->
-    <section class="mode-section active" id="flashcard-mode" aria-label="Flashcard Drill">
+    <!-- ── FLASHCARD DRILL ── -->
+    <section class="mode-section active" id="flashcard-mode">
       <div class="mode-header">
         <h2>Flashcard Drill</h2>
         <button class="help-btn" data-mode="flashcard">How to play</button>
       </div>
-
       <div class="game-area felt-surface">
-
         <div class="shoe-bar">
           <div class="shoe-text">
             <span id="fc-shoe-info">Press Start to begin</span>
@@ -102,107 +116,236 @@
             <div class="shoe-progress-fill" id="fc-shoe-progress" style="width:0%"></div>
           </div>
         </div>
-
         <div class="card-stage">
-          <div class="card-wrapper" id="fc-card-wrapper">
-            <div class="playing-card face-down" id="fc-card">
-              <div class="card-back"></div>
-            </div>
+          <div class="card-wrapper">
+            <div class="playing-card face-down" id="fc-card"><div class="card-back"></div></div>
           </div>
         </div>
-
         <div class="count-zone">
           <div class="count-prompt">What is the running count?</div>
           <div class="count-input-row">
-            <button class="count-adj-btn" id="fc-minus" aria-label="Decrease count">−</button>
-            <input type="number" id="fc-count-input" value="0" min="-200" max="200"
-                   inputmode="numeric" aria-label="Running count">
-            <button class="count-adj-btn" id="fc-plus" aria-label="Increase count">+</button>
+            <button class="count-adj-btn" id="fc-minus">−</button>
+            <input type="number" id="fc-count-input" value="0" min="-200" max="200" inputmode="numeric" aria-label="Running count">
+            <button class="count-adj-btn" id="fc-plus">+</button>
           </div>
           <button class="submit-btn" id="fc-submit">Submit <kbd>↵</kbd></button>
         </div>
-
         <div class="feedback-bar" id="fc-feedback" role="status" aria-live="polite"></div>
-
         <div class="session-stats-row">
-          <div class="ss-item">
-            <div class="ss-value" id="fc-correct">0</div>
-            <div class="ss-label">Correct</div>
-          </div>
-          <div class="ss-item">
-            <div class="ss-value" id="fc-streak">0</div>
-            <div class="ss-label">Streak</div>
-          </div>
-          <div class="ss-item">
-            <div class="ss-value" id="fc-accuracy">—</div>
-            <div class="ss-label">Accuracy</div>
-          </div>
-          <div class="ss-item">
-            <div class="ss-value" id="fc-cards">0</div>
-            <div class="ss-label">Cards Seen</div>
-          </div>
+          <div class="ss-item"><div class="ss-value" id="fc-correct">0</div><div class="ss-label">Correct</div></div>
+          <div class="ss-item"><div class="ss-value" id="fc-streak">0</div><div class="ss-label">Streak</div></div>
+          <div class="ss-item"><div class="ss-value" id="fc-accuracy">—</div><div class="ss-label">Accuracy</div></div>
+          <div class="ss-item"><div class="ss-value" id="fc-cards">0</div><div class="ss-label">Cards Seen</div></div>
         </div>
-
         <div class="action-row">
           <button class="primary-btn" id="fc-start">Start</button>
           <button class="secondary-btn" id="fc-reset">Reset</button>
         </div>
-
       </div>
     </section>
 
-    <!-- ──────────────── SPEED ROUND (stub) ──────────────── -->
-    <section class="mode-section" id="speed-mode" aria-label="Speed Round">
-      <div class="coming-soon">
-        <div class="cs-icon">⏱</div>
+    <!-- ── SPEED ROUND ── -->
+    <section class="mode-section" id="speed-mode">
+      <div class="mode-header">
         <h2>Speed Round</h2>
-        <p>Timed flashcard drill — race against the clock.</p>
-        <span class="cs-badge">Coming Soon</span>
+        <button class="help-btn" data-mode="speed">How to play</button>
+      </div>
+      <div class="game-area felt-surface">
+        <div class="shoe-bar">
+          <div class="shoe-text">
+            <span id="sr-shoe-info">Press Start to begin</span>
+            <span class="shoe-sep">·</span>
+            <span id="sr-deck-info">1 deck · 75% penetration</span>
+          </div>
+          <div class="shoe-progress-track">
+            <div class="shoe-progress-fill" id="sr-shoe-progress" style="width:0%"></div>
+          </div>
+        </div>
+        <div class="sr-timer-wrap">
+          <div class="sr-timer" id="sr-timer">60</div>
+          <div class="sr-timer-label">seconds</div>
+          <div class="sr-timer-track">
+            <div class="sr-timer-bar" id="sr-timer-bar" style="width:100%"></div>
+          </div>
+        </div>
+        <div class="card-stage">
+          <div class="card-wrapper">
+            <div class="playing-card face-down" id="sr-card"><div class="card-back"></div></div>
+          </div>
+        </div>
+        <div class="count-zone">
+          <div class="count-prompt">Running count?</div>
+          <div class="count-input-row">
+            <button class="count-adj-btn" id="sr-minus">−</button>
+            <input type="number" id="sr-count-input" value="0" min="-200" max="200" inputmode="numeric" aria-label="Running count">
+            <button class="count-adj-btn" id="sr-plus">+</button>
+          </div>
+          <button class="submit-btn" id="sr-submit">Submit <kbd>↵</kbd></button>
+        </div>
+        <div class="feedback-bar" id="sr-feedback" role="status" aria-live="polite"></div>
+        <div class="session-stats-row">
+          <div class="ss-item"><div class="ss-value" id="sr-correct">0</div><div class="ss-label">Correct</div></div>
+          <div class="ss-item"><div class="ss-value" id="sr-streak">0</div><div class="ss-label">Best Streak</div></div>
+          <div class="ss-item"><div class="ss-value" id="sr-accuracy">—</div><div class="ss-label">Accuracy</div></div>
+          <div class="ss-item"><div class="ss-value" id="sr-cpm">—</div><div class="ss-label">Cards/min</div></div>
+        </div>
+        <div class="action-row">
+          <button class="primary-btn" id="sr-start">Start</button>
+          <button class="secondary-btn" id="sr-reset">Reset</button>
+        </div>
       </div>
     </section>
 
-    <!-- ──────────────── MULTI-CARD (stub) ──────────────── -->
-    <section class="mode-section" id="multi-mode" aria-label="Multi-Card">
-      <div class="coming-soon">
-        <div class="cs-icon">🃏</div>
+    <!-- ── MULTI-CARD ── -->
+    <section class="mode-section" id="multi-mode">
+      <div class="mode-header">
         <h2>Multi-Card</h2>
-        <p>3–5 cards revealed at once. Track the net count.</p>
-        <span class="cs-badge">Coming Soon</span>
+        <button class="help-btn" data-mode="multi">How to play</button>
+      </div>
+      <div class="game-area felt-surface">
+        <div class="shoe-bar">
+          <div class="shoe-text">
+            <span id="mc-shoe-info">Press Start to begin</span>
+            <span class="shoe-sep">·</span>
+            <span id="mc-deck-info">1 deck · 75% penetration</span>
+          </div>
+          <div class="shoe-progress-track">
+            <div class="shoe-progress-fill" id="mc-shoe-progress" style="width:0%"></div>
+          </div>
+        </div>
+        <div class="mc-card-row" id="mc-card-row">
+          <!-- populated by JS -->
+        </div>
+        <div class="count-zone">
+          <div class="count-prompt">Running count after all these cards?</div>
+          <div class="count-input-row">
+            <button class="count-adj-btn" id="mc-minus">−</button>
+            <input type="number" id="mc-count-input" value="0" min="-200" max="200" inputmode="numeric" aria-label="Running count">
+            <button class="count-adj-btn" id="mc-plus">+</button>
+          </div>
+          <button class="submit-btn" id="mc-submit">Submit <kbd>↵</kbd></button>
+        </div>
+        <div class="feedback-bar" id="mc-feedback" role="status" aria-live="polite"></div>
+        <div class="session-stats-row">
+          <div class="ss-item"><div class="ss-value" id="mc-correct">0</div><div class="ss-label">Correct</div></div>
+          <div class="ss-item"><div class="ss-value" id="mc-streak">0</div><div class="ss-label">Streak</div></div>
+          <div class="ss-item"><div class="ss-value" id="mc-accuracy">—</div><div class="ss-label">Accuracy</div></div>
+          <div class="ss-item"><div class="ss-value" id="mc-groups">0</div><div class="ss-label">Groups</div></div>
+        </div>
+        <div class="action-row">
+          <button class="primary-btn" id="mc-start">Start</button>
+          <button class="secondary-btn" id="mc-reset">Reset</button>
+        </div>
       </div>
     </section>
 
-    <!-- ──────────────── BLACKJACK (stub) ──────────────── -->
-    <section class="mode-section" id="blackjack-mode" aria-label="Blackjack Practice">
-      <div class="coming-soon">
-        <div class="cs-icon">♠</div>
+    <!-- ── BLACKJACK ── -->
+    <section class="mode-section" id="blackjack-mode">
+      <div class="mode-header">
         <h2>Blackjack Practice</h2>
-        <p>Full game with real-time count accuracy grading.</p>
-        <span class="cs-badge">Coming Soon</span>
+        <button class="help-btn" data-mode="blackjack">How to play</button>
+      </div>
+      <div class="bj-table felt-surface">
+
+        <div class="shoe-bar">
+          <div class="shoe-text">
+            <span id="bj-shoe-info">Place a bet to begin</span>
+            <span class="shoe-sep">·</span>
+            <span id="bj-deck-info">1 deck · 75% penetration</span>
+          </div>
+          <div class="shoe-progress-track">
+            <div class="shoe-progress-fill" id="bj-shoe-progress" style="width:0%"></div>
+          </div>
+        </div>
+
+        <div class="bj-area dealer-area">
+          <div class="bj-area-label">Dealer <span class="bj-hand-val" id="bj-dealer-val"></span></div>
+          <div class="bj-hand" id="bj-dealer-hand"></div>
+        </div>
+
+        <div class="bj-result-banner hidden" id="bj-result-banner"></div>
+
+        <div class="bj-area player-area">
+          <div class="bj-area-label">You <span class="bj-hand-val" id="bj-player-val"></span></div>
+          <div class="bj-hand" id="bj-player-hand"></div>
+        </div>
+
+        <div class="bj-count-row">
+          <span class="bj-count-label">My count:</span>
+          <div class="bj-count-input-group">
+            <button class="count-adj-btn sm" id="bj-count-minus">−</button>
+            <input type="number" id="bj-count-input" value="0" min="-200" max="200" inputmode="numeric" aria-label="Your running count">
+            <button class="count-adj-btn sm" id="bj-count-plus">+</button>
+          </div>
+          <span class="bj-count-grade" id="bj-count-grade"></span>
+        </div>
+
+        <div class="bj-controls">
+          <div class="bj-chips-row">
+            <div class="bj-chips-info">
+              <span class="bj-chips-lbl">Chips</span>
+              <span class="bj-chips-val" id="bj-chips">$100</span>
+            </div>
+            <div class="bj-chips-info">
+              <span class="bj-chips-lbl">Bet</span>
+              <span class="bj-chips-val" id="bj-bet-display">$0</span>
+            </div>
+          </div>
+
+          <!-- Betting phase -->
+          <div class="bj-phase" id="bj-phase-bet">
+            <div class="bj-chip-buttons">
+              <button class="chip-btn" data-amount="5">$5</button>
+              <button class="chip-btn" data-amount="10">$10</button>
+              <button class="chip-btn" data-amount="25">$25</button>
+              <button class="chip-btn" data-amount="50">$50</button>
+              <button class="chip-btn chip-clear" id="bj-clear-bet">✕</button>
+            </div>
+            <button class="primary-btn" id="bj-deal-btn" disabled>Deal</button>
+          </div>
+
+          <!-- Playing phase -->
+          <div class="bj-phase hidden" id="bj-phase-play">
+            <button class="action-btn hit-btn" id="bj-hit">Hit</button>
+            <button class="action-btn stand-btn" id="bj-stand">Stand</button>
+            <button class="action-btn double-btn" id="bj-double">Double</button>
+          </div>
+
+          <!-- Result phase -->
+          <div class="bj-phase hidden" id="bj-phase-result">
+            <div class="bj-count-check" id="bj-count-check"></div>
+            <button class="primary-btn" id="bj-next-hand">Next Hand</button>
+          </div>
+        </div>
+
+        <div class="session-stats-row">
+          <div class="ss-item"><div class="ss-value" id="bj-stat-wins">0</div><div class="ss-label">Wins</div></div>
+          <div class="ss-item"><div class="ss-value" id="bj-stat-losses">0</div><div class="ss-label">Losses</div></div>
+          <div class="ss-item"><div class="ss-value" id="bj-stat-chips">$100</div><div class="ss-label">Chips</div></div>
+          <div class="ss-item"><div class="ss-value" id="bj-stat-count">—</div><div class="ss-label">Count Acc.</div></div>
+        </div>
+
       </div>
     </section>
 
-    <!-- ──────────────── LEARN ──────────────── -->
-    <section class="mode-section" id="learn-mode" aria-label="Learn Hi-Lo">
-      <div class="learn-content" id="learn-content">
-        <!-- populated by JS -->
-      </div>
+    <!-- ── LEARN ── -->
+    <section class="mode-section" id="learn-mode">
+      <div class="learn-content" id="learn-content"></div>
     </section>
 
-    <!-- ──────────────── STATS ──────────────── -->
-    <section class="mode-section" id="stats-mode" aria-label="Statistics">
-      <div class="stats-content" id="stats-content">
-        <!-- populated by JS -->
-      </div>
+    <!-- ── STATS ── -->
+    <section class="mode-section" id="stats-mode">
+      <div class="stats-content" id="stats-content"></div>
     </section>
 
   </main>
 
-  <!-- ═══════════════════════════ HOW-TO MODAL ════════════════════════════ -->
+  <!-- ═══════════════════ HOW-TO MODAL ═══════════════════ -->
   <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal">
       <div class="modal-header">
         <h3 id="modal-title">How to Play</h3>
-        <button class="close-btn" id="closeModal" aria-label="Close">✕</button>
+        <button class="close-btn" id="closeModal">✕</button>
       </div>
       <div class="modal-body" id="modal-body"></div>
       <div class="modal-footer">
