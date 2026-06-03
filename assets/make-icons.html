@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<!-- Open this file in a browser, then right-click each image and "Save As"
+     icon-192.png and icon-512.png into the assets/ folder. -->
+<html>
+<head><title>Generate Icons</title>
+<style>body{background:#222;display:flex;gap:24px;padding:24px;flex-direction:column;align-items:flex-start}
+canvas{border-radius:12px}p{color:#aaa;font-family:sans-serif;font-size:13px}</style>
+</head>
+<body>
+<p>Right-click → Save image as <strong>icon-192.png</strong> and <strong>icon-512.png</strong> in the <code>assets/</code> folder.</p>
+<canvas id="c192" width="192" height="192"></canvas>
+<canvas id="c512" width="512" height="512"></canvas>
+
+<script>
+function drawIcon(canvas) {
+  const s = canvas.width;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#07110a';
+  ctx.beginPath();
+  ctx.roundRect(0, 0, s, s, s * 0.13);
+  ctx.fill();
+
+  // Felt inner
+  const pad = s * 0.07;
+  ctx.fillStyle = '#1a5e2c';
+  ctx.beginPath();
+  ctx.roundRect(pad, pad, s - pad*2, s - pad*2, s * 0.09);
+  ctx.fill();
+
+  // Gold spade
+  ctx.fillStyle = '#c8a02a';
+  ctx.font = `bold ${s * 0.6}px Georgia, serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('♠', s / 2, s / 2);
+
+  // Subtle border
+  ctx.strokeStyle = 'rgba(200,160,42,0.35)';
+  ctx.lineWidth = s * 0.015;
+  ctx.beginPath();
+  ctx.roundRect(pad, pad, s - pad*2, s - pad*2, s * 0.09);
+  ctx.stroke();
+}
+
+drawIcon(document.getElementById('c192'));
+drawIcon(document.getElementById('c512'));
+</script>
+</body>
+</html>
